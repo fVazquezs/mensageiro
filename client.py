@@ -1,18 +1,40 @@
 import socket
 import sys
+from threading import Thread
 
-client = socket.socket()
+def receiver(client):
+    openned = True
+    while openned:
+        try:
+            message = client.recv(1024).decode()
+            print(message)
+            if message == 'quit':
+                openned = False
+                client.close()
+        except socket.error as err: 
+            openned = False
+            print("Bye")
 
-port = 8080
+def sender(client):
+    openned = True
+    while openned:
+        send = input()
+        client.send(send.encode())
+        if send == 'quit':
+            openned = False
+            client.close()
 
-client.connect(('localhost', port))
 
-print(client.recv(1024))
+def main():
+    client = socket.socket()
+    port = 8080
+    print("Your name: ", end ='')
+    name = input()
+    client.connect(('localhost', port))
+    client.sendall(name.encode())
+    receiverThread = Thread(target = receiver, args = (client, ))
+    receiverThread.start()
+    senderThread = Thread(target = sender, args = (client, ))
+    senderThread.start()
 
-print("Send a message: ")
-
-message = input()
-
-client.send(message.encode())
-
-client.close()
+main()
