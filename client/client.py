@@ -11,7 +11,7 @@ def receiver(client):
             if message == 'quit':
                 openned = False
                 client.close()
-        except socket.error as err: 
+        except socket.error: 
             openned = False
             print("Bye")
 
@@ -28,13 +28,18 @@ def sender(client):
 def main():
     client = socket.socket()
     port = 8080
+    client.connect(('localhost', port))
+    print(client.recv(1024).decode())
     print("Your name: ", end ='')
     name = input()
-    client.connect(('localhost', port))
     client.sendall(name.encode())
-    receiverThread = Thread(target = receiver, args = (client, ))
-    receiverThread.start()
-    senderThread = Thread(target = sender, args = (client, ))
-    senderThread.start()
-
+    success = client.recv(1024).decode()
+    if success == 'OK':
+        receiverThread = Thread(target = receiver, args = (client, ))
+        receiverThread.start()
+        senderThread = Thread(target = sender, args = (client, ))
+        senderThread.start()
+    else:
+        print(success) 
+        client.close()
 main()
