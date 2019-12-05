@@ -43,3 +43,7 @@ def main():
         print(success) 
         client.close()
 main()
+
+class Client:
+    def __init__(self, port):
+        self.port = port
